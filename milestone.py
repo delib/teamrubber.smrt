@@ -164,6 +164,7 @@ html = """
                   </tbody>
                 </table>
             </div>
+            <p class="small text-right muted">Page generated: %s</p>
         </div>
     </body>
 </html>
@@ -180,6 +181,7 @@ html = """
     delta['finished']['devp'],
     delta['finished']['qap'],
     delta['finished']['devp'] + delta['finished']['qap'],
+    str(datetime.now())
     )
 
 
