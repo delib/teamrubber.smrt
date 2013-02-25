@@ -25,3 +25,25 @@ What is it not doing?
 I'm stuck because seriously, how the hell do I find the Milestone Id?
 ---------------------------------------------------------------------
 Yeah, mental isn't it. Go into PlanIO and do a ticket search for things in the milestone you want. Then examine the URL. Somewhere in there will be something that says "fixed_version_id". The number following that is (probably) the milestone Id you are looking for. If you are not sure, try the same thing with a different milestone, and see what changes in the URL between the two...
+
+I need to restart it!
+---------------------
+Run this:
+
+  nohup python -m SimpleHTTPServer 7000 --name=Milestone Reporting &
+
+
+I want to KILL it!
+------------------
+Run this:
+
+  ps axww | grep Milestone
+
+You'll see something like this:
+
+  5847   1  S      0:00.05 python -m SimpleHTTPServer 7000 --name=Milestone Reporting
+  6058   1  S+     0:00.00 grep Milestone  
+
+Then kill the one that says Milestone Reportin, e.g:
+
+  kill 5847
