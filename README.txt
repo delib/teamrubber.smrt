@@ -47,3 +47,12 @@ You'll see something like this:
 Then kill the one that says Milestone Reportin, e.g:
 
   kill 5847
+
+I missed a day, help! (Or I want to see a day from the past)
+------------------------------------------------------------
+No worries, each time the cron job runs, it saves two files:
+ - index.html
+ - YYYY-MM-DD.html
+
+The index.html gets killed and regenerated every day. The datestamped html file will not get overwritten by the script, unless madness happens and we 
+travel back in time somehow. Or someone plays a cruel joke on pooh.
