@@ -115,7 +115,7 @@ html = """
 
     </head>
     <body>
-        <div class="container" style="position: relative; margin: 0 auto 0; width: 800px; top: 30px;">
+        <div class="container" style="position: relative; margin: 0 auto 0; width: 1000px; top: 30px;">
             <h1>Stats for %s on %s</h1>
             <br />
             <div class="remaining">
