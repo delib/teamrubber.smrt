@@ -40,6 +40,7 @@ data = csv.DictReader(csv_file)
 today = datetime.now() 
 today = today - timedelta(hours=today.hour, minutes=today.minute, seconds=today.second, microseconds=today.microsecond)
 daystocheck = 1
+
 if today.weekday() == 0: # Monday
     daystocheck = 3
 yesterday = today - timedelta(days=daystocheck)
@@ -118,8 +119,8 @@ html = """
             <h1>Stats for %s on %s</h1>
             <br />
             <div class="remaining">
-                <h3>Remaining:</h3>
-                <table class="table table-bordered">
+                <h2>Remaining:</h2>
+                <table class="table table-bordered" style="font-size: 28px;">
                   <thead>
                     <tr style="background: #eaeaea;">
                         <th>Total Tickets</th>
@@ -142,8 +143,8 @@ html = """
             </div>
             <br />
             <div class="completed small">
-                <h4>Completed yesterday (or nearest weekday)</h4>
-                <table class="table table-bordered">
+                <h3>Completed yesterday (or nearest weekday)</h3>
+                <table class="table table-bordered" style="font-size: 24px;">
                   <thead>
                     <tr style="background: #eaeaea;">
                         <th>Total Tickets</th>
@@ -184,10 +185,27 @@ html = """
     str(datetime.now())
     )
 
-
+# Update the index.html
 index = open("publish/index.html", "w")
 index.write(html)
 index.close()
+
+# Write an archive version
 archive = open("publish/%s.html" % today.strftime("%Y-%m-%d"), "w")
 archive.write(html)
 archive.close()
+
+logtext = """"%s","%s","%s","%s","%s","%s"\n""" % (
+    today.strftime("%Y/%m/%d"),
+    tickets['inprogress']['count'] + tickets['backlog']['count'],
+    tickets['inprogress']['unp'] + tickets['backlog']['unp'],
+    tickets['inprogress']['devp'] + tickets['backlog']['devp'],
+    tickets['inprogress']['qap'] + tickets['backlog']['qap'],
+    tickets['inprogress']['devp'] + tickets['backlog']['devp'] + tickets['inprogress']['qap'] + tickets['backlog']['qap']
+)
+
+# Write a text log entry that we can then plot from on the index page
+log = open("publish/%s.csv" % milestone_name, "a")
+log.write(logtext)
+log.close()
+

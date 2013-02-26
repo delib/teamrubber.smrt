@@ -12,13 +12,14 @@ This is a small python script that generates an index.html page (plus a datestam
  - You have to manually update the milestone.txt (in the folder on pooh, and svn) each time the milestone changes, sorry!
  - The PlanIO user it's using while running on Pooh is a Read Only user I created especially for this job
  - You can use your own user locally if you like
+ - It writes a .csv file named after the milestone each day, with the summary data (first table)
 
 What is it not doing?
 ---------------------
  - Clever stuff
  - Aggregation
  - Making you tea
- - Building charts for you
+ - Building charts for you (Though the .csv file could be used for that in future, when I find time)
  - Calculating what milestone we're on
  - Doing work for you
  
