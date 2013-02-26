@@ -13,13 +13,13 @@ This is a small python script that generates an index.html page (plus a datestam
  - The PlanIO user it's using while running on Pooh is a Read Only user I created especially for this job
  - You can use your own user locally if you like
  - It writes a .csv file named after the milestone each day, with the summary data (first table)
+ - Draws a couple of charts for you using jquery.csv + jquery.jqplot
 
 What is it not doing?
 ---------------------
  - Clever stuff
  - Aggregation
  - Making you tea
- - Building charts for you (Though the .csv file could be used for that in future, when I find time)
  - Calculating what milestone we're on
  - Doing work for you
  

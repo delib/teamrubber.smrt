@@ -1,0 +1,35 @@
+V 0.2 - 26/02/2013
+==================
+New release to add charting to the page
+
+Adds: 
+ - Chart for points vs. time
+ - Chart for tickets vs. time
+
+Does not do:
+ - Automagically detecting latest milestone
+ - Track velocity
+ - Legacy pages will still show most up to date charts, sorry
+ - Track people in (Though we might be able to nick that from Google Calendars one day)
+
+V 0.1 - 25/02/2013
+==================
+Initial release.
+
+Does:
+ - The generated pages are being served (or should be) on a SimpleHTTPServer on Pooh, in /home/TomB/milestone_reporting/publish
+ - The python script (and associated text files) live in /home/TomB/milestone_reporting/publish
+ - They also live in svn, here: http://tigger.teamrubber.com/svn/repos/delia/teamrubber.smrt
+ - The script gets run every weekday at 00:01 by crontab
+ - You have to manually update the milestone.txt (in the folder on pooh, and svn) each time the milestone changes, sorry!
+ - The PlanIO user it's using while running on Pooh is a Read Only user I created especially for this job
+ - You can use your own user locally if you like
+ - It writes a .csv file named after the milestone each day, with the summary data (first table)
+
+Does not:
+ - Clever stuff
+ - Aggregation
+ - Making you tea
+ - Building charts for you (Though the .csv file could be used for that in future, when I find time)
+ - Calculating what milestone we're on
+ - Doing work for you
