@@ -112,13 +112,13 @@ html = """
     <head>
         <title>Milestone Stats</title>
         <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/css/bootstrap-combined.min.css" rel="stylesheet" />
-        <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="../js/excanvas.min.js"></script><![endif]-->
-        <script language="javascript" type="text/javascript" src="../js/jquery.min.js"></script>
-        <script language="javascript" type="text/javascript" src="../js/jquery.jqplot.min.js"></script>
-        <script type="text/javascript" src="../js/plugins/jqplot.dateAxisRenderer.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="../js/jquery.jqplot.min.css" />
-        <script language="javascript" type="text/javascript" src="../js/jquery.csv.min.js"></script>
-        <script language="javascript" type="text/javascript" src="../js/teamrubber.series.js"></script>
+        <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
+        <script language="javascript" type="text/javascript" src="js/jquery.min.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.jqplot.min.js"></script>
+        <script type="text/javascript" src="js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="js/jquery.jqplot.min.css" />
+        <script language="javascript" type="text/javascript" src="js/jquery.csv.min.js"></script>
+        <script language="javascript" type="text/javascript" src="js/teamrubber.series.js"></script>
         <script>
             $(function(){
                 $.get("Kit Kat.csv", function(data) {
