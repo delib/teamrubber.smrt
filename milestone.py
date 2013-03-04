@@ -121,7 +121,7 @@ html = """
         <script language="javascript" type="text/javascript" src="js/teamrubber.series.js"></script>
         <script>
             $(function(){
-                $.get("Kit Kat.csv", function(data) {
+                $.get("%s.csv", function(data) {
                     var lines = $.csv.toArrays(data);
                     var series = translateArraysToSeries(lines);
                     plotChart(series);
@@ -196,6 +196,7 @@ html = """
     </body>
 </html>
 """ % (
+    milestone_name,
     milestone_name,
     today.strftime("%Y/%m/%d"),
     tickets['inprogress']['count'] + tickets['backlog']['count'],
