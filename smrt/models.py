@@ -3,17 +3,26 @@ from persistent import Persistent
 
 class PlanIO(PersistentMapping):
     __parent__ = __name__ = None
+    
+    projects = []
+
+class Project(PersistentMapping):
+    
+    name = ""
+    short_name = ""
+    subdomain = ""
+    milestones = ""
+    username = ""
+    password = ""
 
 class Milestone(Persistent):
     
-    def __init__(self, name, mile_id, date_added, username, password):
+    def __init__(self, name, mile_id, date_added):
         self.name = name
         self.mile_id = mile_id
         self.date_added = date_added
         self.date_updated = None
         self.days = []
-        self.username = username
-        self.password = password
         self.short_name = name.lower().replace(" ","-").strip("?;!.&'\"/\\@")
     
     def __repr__(self):
