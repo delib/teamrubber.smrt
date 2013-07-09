@@ -4,12 +4,12 @@
         <div class="container centered">
             <h1>Simple Milestone Reporting Tool</h1>
             <br />
-            <h2>Milestones</h2>
-            <h5 tal:condition="not:exist">No milestones are currently configured. <a href="/add_milestone">Add one?</a></h5>
+            <h2>Projects</h2>
+            <h5 tal:condition="not:exist">No projects are currently configured. <a href="/add_project">Add one?</a></h5>
             <ul tal:condition="exist">
-                <li tal:repeat="mile milestones"><a href="/${milestones[mile].short_name}">${milestones[mile].name}</a></li>
+                <li tal:repeat="project_key projects"><a tal:define="project projects[project_key]" href="/${project.short_name}">${project.name}</a></li>
                 <br />
-                <li><a href="/add_milestone">Add Another Milestone</a></li>
+                <li><a href="/add_project">Add Another Project</a></li>
             </ul>
         </div>
         
