@@ -25,6 +25,9 @@
             
             });
         </script>
+        
+        <!-- Refresh automatically every once in a while -->
+        <meta http-equiv="refresh" content="600" />
     
     </tal:block>
     
