@@ -1,0 +1,102 @@
+<tal:block metal:use-macro="view.site_style">
+    <tal:block metal:fill-slot="javascript">
+    
+        <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/static/js/excanvas.min.js"></script><![endif]-->
+        <script language="javascript" type="text/javascript" src="/static/js/jquery.min.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
+        <script type="text/javascript" src="/static/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/js/jquery.jqplot.min.css" />
+        <script language="javascript" type="text/javascript" src="/static/js/jquery.csv.min.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/js/teamrubber.series.js"></script>
+        <script>
+            $(function(){
+                $.get("/publish/${milestone.name}.csv", function(data) {
+                    var lines = $.csv.toArrays(data);
+                    var series = translateArraysToSeries(lines);
+                    plotChart(series);
+                }, "text").fail(
+                    function(jqxhr, status, message)
+                    {
+                        console.log(jqxhr);
+                        console.log(status);
+                        console.log(message);
+                    }
+                );
+            
+            });
+        </script>
+    
+    </tal:block>
+    
+    <tal:block metal:fill-slot="content">
+    
+        <div class="container" style="position: relative; margin: 0 auto 0; width: 1000px; top: 30px;">
+            <h1>Statistics for ${milestone.name} on ${nice_date}</h1>
+            <br />
+            <div class="remaining">
+                <h2>Remaining:</h2>
+                <table class="table table-bordered" style="font-size: 28px;">
+                  <thead>
+                    <tr style="background: #eaeaea;">
+                        <th>Total Tickets</th>
+                        <th>Unpointed tickets</th>
+                        <th>Dev Points</th>
+                        <th>QA Points</th>
+                        <th>Total Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                        <td>${today.rem_total_tickets}</td>
+                        <td>${today.rem_unpointed_tickets}</td>
+                        <td>${today.rem_dev_points}</td>
+                        <td>${today.rem_qa_points}</td>
+                        <td>${today.rem_dev_points + today.rem_qa_points}</td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+            <br />
+            <div class="completed small">
+                <h3>Completed yesterday (or nearest weekday)</h3>
+                <table class="table table-bordered" style="font-size: 24px;">
+                  <thead>
+                    <tr style="background: #eaeaea;">
+                        <th>Total Tickets</th>
+                        <th>Unpointed tickets</th>
+                        <th>Dev Points</th>
+                        <th>QA Points</th>
+                        <th>Total Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                        <td>${today.yest_total_tickets}</td>
+                        <td>${today.yest_unpointed_tickets}</td>
+                        <td>${today.yest_dev_points}</td>
+                        <td>${today.yest_qa_points}</td>
+                        <td>${today.yest_dev_points + today.yest_qa_points}</td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+            <div id="points"></div>
+            <br />
+            <div id="tickets"></div>
+            <p class="small text-right muted">Page generated: ${gen_date}</p>
+            
+            <br />
+            
+            <tal:block tal:condition="python:(yesterday != None)">
+                <a class="pull-left" href="?time_travel=${yest_num}">Previous Day</a>
+            </tal:block>
+            <tal:block tal:condition="python:(tomorrow != None)">
+                <a class="pull-right" href="?time_travel=${tomorrow_num}">Next Day</a>
+            </tal:block>
+            
+            <br /><br />
+        </div>
+        
+        
+    </tal:block>
+</tal:block>
