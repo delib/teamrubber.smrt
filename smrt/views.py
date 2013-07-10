@@ -81,30 +81,97 @@ class Views(BaseLayouts):
         return { "error" : error }
             
     
+    @view_config(name="edit", context=Project, renderer="templates/edit_project.pt")
+    def edit_project_view(self):
+        
+        error = None
+        
+        if "action" in self.request.GET and self.request.GET["action"] == "save":
+            project = self.context
+            self.context.__parent__.pop(project.__name__, None)
+            project.name = self.request.POST["name"]
+            project.short_name = self.request.POST["short_name"]
+            project.subdomain = self.request.POST["subdomain"]
+            project.username = self.request.POST["username"]
+            if len(self.request.POST["password"]) > 0: # Only update password if we are given a new one!
+                project.password = self.request.POST["password"]
+            project.__parent__ = self.context.__parent__
+            project.__name__ = self.request.POST["short_name"]
+            self.context.__parent__[project.__name__] = project
+            self.context._p_changed = True
+            return HTTPFound(location="/")
+        
+        return { "error" : error, "project" : self.context }
+    
+    @view_config(name="remove", context=Project)
+    def remove_project_view(self):
+        
+        # Detach the item from the parent instance
+        self.context.__parent__.pop(self.context.__name__, None)
+        self.context.__parent__ = None
+        self.context._p_changed = True
+        
+        return HTTPFound(location="/")
+    
     @view_config(name="add_milestone",context=Project, renderer="templates/add_milestone.pt")
     def add_milestone_view(self):
         
         error = None
         
         if "action" in self.request.GET and self.request.GET["action"] == "add":
+            
             if not "name" in self.request.POST or len(self.request.POST["name"]) == 0:
                 error = "No milestone name provided"
-            if not "username" in self.request.POST or not "password" in self.request.POST or len(self.request.POST["username"]) == 0  or len(self.request.POST["password"]) == 0:
-                    error = "No login details provided"
+            else:
+                name = self.request.POST["name"]
+                mile_id = self.request.POST["mile_id"]
             
-            name = self.request.POST["name"]
-            mile_id = self.request.POST["mile_id"]
-            
-            new_mile = Milestone(name, mile_id, datetime.now())
-            new_mile.__parent__ = self.context
-            new_mile.__name__ = new_mile.short_name
-            self.context[new_mile.__name__] = new_mile
-            # Forward to update everything!
-            return HTTPFound(location="/refresh")
+                new_mile = Milestone(name, mile_id, datetime.now())
+                new_mile.__parent__ = self.context
+                new_mile.__name__ = new_mile.short_name
+                self.context[new_mile.__name__] = new_mile
+                # Forward to update everything!
+                return HTTPFound(location="/refresh")
             
         
         return { "error" : error, "addurl" : self.request.resource_url(self.context, "add_milestone") } 
         
+    @view_config(name="edit", context=Milestone, renderer="templates/edit_milestone.pt")
+    def edit_milestone_view(self):
+    
+        error = None
+    
+        if "action" in self.request.GET and self.request.GET["action"] == "save":
+            
+            if not "name" in self.request.POST or len(self.request.POST["name"]) == 0:
+                error = "No milestone name provided"
+            else:
+                name = self.request.POST["name"]
+                mile_id = self.request.POST["mile_id"]
+        
+                mile = self.context
+                self.context.__parent__.pop(mile.__name__, None)
+                mile.mile_id = mile_id
+                mile.name = name
+                mile.short_name = name.lower().replace(" ","-").strip("?;!.&'\"/\\@")
+                mile.__parent__ = self.context.__parent__
+                mile.__name__ = mile.short_name
+                self.context.__parent__[mile.__name__] = mile
+                
+                return HTTPFound(location=self.request.resource_url(self.context.__parent__))
+        
+    
+        return { "error" : error, "editurl" : self.request.resource_url(self.context, "edit"), "milestone" : self.context }
+    
+    @view_config(name="remove", context=Milestone)
+    def remove_milestone_view(self):
+        
+        mile = self.context
+        self.context.__parent__.pop(mile.__name__, None)
+        mile.__parent__ = None
+        
+        return HTTPFound(location=self.request.resource_url(self.context.__parent__))
+    
     @view_config(name="refresh", context=PlanIO)
     def refresh_view(self):
         
@@ -123,3 +190,4 @@ class Views(BaseLayouts):
                 milestone.date_updated = None
             
         return HTTPFound(location="/")
+    

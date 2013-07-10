@@ -1,0 +1,1 @@
+This directory stores the exported CSV files from the scraper used for graphing the past performance
