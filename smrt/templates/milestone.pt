@@ -38,7 +38,7 @@
             <br />
             <div class="remaining">
                 <h2>Remaining:</h2>
-                <table class="table table-bordered" style="font-size: 28px;">
+                <table class="table table-bordered" style="font-size: 24px;">
                   <thead>
                     <tr style="background: #eaeaea;">
                         <th>Total Tickets</th>

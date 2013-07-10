@@ -111,6 +111,8 @@ class Views(BaseLayouts):
         self.context.__parent__ = None
         self.context._p_changed = True
         
+        # We don't remove the CSV files as they act as a historical record
+        
         return HTTPFound(location="/")
     
     @view_config(name="add_milestone",context=Project, renderer="templates/add_milestone.pt")
@@ -169,6 +171,8 @@ class Views(BaseLayouts):
         mile = self.context
         self.context.__parent__.pop(mile.__name__, None)
         mile.__parent__ = None
+        
+        # We don't remove the CSV files as they act as a historical record
         
         return HTTPFound(location=self.request.resource_url(self.context.__parent__))
     
