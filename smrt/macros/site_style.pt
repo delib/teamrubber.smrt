@@ -9,6 +9,7 @@
     <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet" />
     <script type="text/javascript" src="/static/js/jquery.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.js"></script>
+    <script type="text/javascript" src="/static/js/tvcontrol.js"></script>
     
     <tal:block metal:define-slot="javascript"></tal:block>
   

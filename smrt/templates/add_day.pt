@@ -1,0 +1,92 @@
+<tal:block metal:use-macro="view.site_style">
+    <tal:block metal:fill-slot="content">
+    
+        <div class="container centered">
+            <h1>Add Historical Day Data</h1>
+            <br />
+            <form class="form-horizontal" action="${request.resource_url(context, 'add_day')}?action=add" method="POST">
+            
+                <div class="control-group">
+                    <label class="control-label" for="dateofbirth">Date:</label>
+                    <div class="controls">
+                        <select class="date_field" name="day" id="day">
+                            <option value="1" selected>1</option>
+                            <option tal:repeat="day python:range(2,32)" value="${day}">${day}</option>
+                        </select>
+                        &nbsp;/&nbsp;
+                        <select class="date_field" name="month" id="month">
+                            <option value="1" selected>1</option>
+                            <option tal:repeat="month python:range(2,13)" value="${month}">${month}</option>
+                        </select>
+                        &nbsp;/&nbsp;
+                        <select class="date_field" name="year" id="year">
+                            <option value="2000" selected>2000</option>
+                            <option tal:repeat="year python:range(2000,2100)" value="${year}">${year}</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="rem_total_tickets" class="control-label">Remaining Total Tickets:</label>
+                    <div class="controls">
+                        <input type="text" name="rem_total_tickets" id="rem_total_tickets" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="rem_unpointed_tickets" class="control-label">Remaining Unpointed Tickets:</label>
+                    <div class="controls">
+                        <input type="text" name="rem_unpointed_tickets" id="rem_unpointed_tickets" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="rem_dev_points" class="control-label">Remaining Dev Points:</label>
+                    <div class="controls">
+                        <input type="text" name="rem_dev_points" id="rem_dev_points" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="rem_qa_points" class="control-label">Remaining QA Points:</label>
+                    <div class="controls">
+                        <input type="text" name="rem_qa_points" id="rem_qa_points" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="yest_total_tickets" class="control-label">Yesterday Total Tickets:</label>
+                    <div class="controls">
+                        <input type="text" name="yest_total_tickets" id="yest_total_tickets" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="yest_unpointed_tickets" class="control-label">Yesterday Unpointed Tickets:</label>
+                    <div class="controls">
+                        <input type="text" name="yest_unpointed_tickets" id="yest_unpointed_tickets" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="yest_dev_points" class="control-label">Yesterday Dev Points:</label>
+                    <div class="controls">
+                        <input type="text" name="yest_dev_points" id="yest_dev_points" />
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="yest_qa_points" class="control-label">Yesterday QA Points:</label>
+                    <div class="controls">
+                        <input type="text" name="yest_qa_points" id="yest_qa_points" />
+                    </div>
+                </div>
+                
+                
+                <button type="submit" value="submit" class="btn btn-primary pull-right"><i class="icon-plus-sign icon-white"></i> Add Day</button>
+                
+            </form>
+        </div>
+        
+    </tal:block>
+</tal:block>

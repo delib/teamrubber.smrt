@@ -8,20 +8,43 @@ import urllib, urllib2, os
 class Scraper(object):
     
     def grabData(self, PlanIORoot):
-            
+        
+        # We don't want to run on weekends
+        if datetime.today().weekday() > 4:
+            print "It's a weekend, SKIP!"
+            return
+        
         # Statuses
-        status_backlog = ["Backlog", "Backlog (Blocked)"]
-        status_in_progress = ["Failed QA / Failed Code Review", "In Progress", "Awaiting QA", "Awaiting Code Review", "In QA"]
-        status_done = ["In Deployment", "Awaiting Deployment", "Implemented", "Invalid"]
-        #import pdb; pdb.set_trace()
+        status_backlog = [
+            "Backlog", 
+            "Backlog (Blocked)",
+        ]
+        status_in_progress = [
+            "Failed QA / Failed Code Review", 
+            "In Progress", 
+            "Awaiting QA", 
+            "Awaiting Code Review", 
+            "In QA",
+        ]
+        status_done = [
+            "In Deployment", 
+            "Awaiting Deployment", 
+            "Implemented", 
+            "Invalid"
+        ]
+        
+        # Run the actual update
         for project_key in PlanIORoot:
             project = PlanIORoot[project_key]
-            for milestone_key in project:
+            for milestone_key in project.milestones:
             
                 milestone = project[milestone_key]
-            
+
+                today = datetime.now() 
+                today = today.replace(hour=0, second=0, microsecond=0)
+                
                 # Don't run twice on the same day!
-                if milestone.date_updated != None and milestone.date_updated.date() >= datetime.today().date():
+                if today.strftime("%d%m%Y") in milestone.days:
                     continue
             
                 # Build an opener which accepts cookies
@@ -29,7 +52,11 @@ class Scraper(object):
                 urllib2.install_opener(opener)
             
                 # Form the request
-                login_params = urllib.urlencode({'username' : project.username, 'password' : project.password})
+                login_params = urllib.urlencode({
+                    'username': project.username, 
+                    'password': project.password,
+                })
+                
                 f = opener.open('https://teamrubber.plan.io/login', login_params)
                 data = f.read()
                 f.close()
@@ -42,9 +69,7 @@ class Scraper(object):
             
                 # Now read that into a dict
                 data = csv.DictReader(csv_file)
-
-                today = datetime.now() 
-                today = today - timedelta(hours=today.hour, minutes=today.minute, seconds=today.second, microseconds=today.microsecond)
+                
                 daystocheck = 1
 
                 if today.weekday() == 0: # Monday
@@ -122,9 +147,9 @@ class Scraper(object):
                 yest_qa_pt = delta['finished']['qap']
             
                 day = Day(today, rem_total, rem_unpointed, rem_dev_pt, rem_qa_pt, yest_total, yest_unpointed, yest_dev_pt, yest_qa_pt)
-                day.__name__ = milestone.short_name + str(today.utctimetuple())
+                day.__name__ = today.strftime("%d%m%Y")
                 day.__parent__ = milestone
-                milestone.days.append(day)
+                milestone.days[day.__name__] = day
                 milestone.date_updated = today
                 milestone._p_changed = True
             

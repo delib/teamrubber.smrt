@@ -33,7 +33,7 @@
     <tal:block metal:fill-slot="content">
     
         <div class="container">
-            <h2>Stats for ${milestone.name} on ${nice_date}</h2>
+            <h2>Stats for ${milestone.name} on ${today.date.strftime("%d/%m/%Y")}</h2>
             <div class="remaining">
                 <h3>Remaining:</h3>
                 <table class="table table-bordered" style="font-size: 24px;">
@@ -84,15 +84,15 @@
             <div id="points"></div>
             <br />
             <div id="tickets"></div>
-            <p class="small text-right muted">Page generated: ${gen_date}</p>
+            <p class="small text-right muted">Page generated: ${today.date.isoformat()}</p>
             
             <br />
             
             <tal:block tal:condition="python:(yesterday != None)">
-                <a class="pull-left" href="?time_travel=${yest_num}">Previous Day</a>
+                <a class="pull-left" href="${request.resource_url(yesterday)}">Previous Day</a>
             </tal:block>
             <tal:block tal:condition="python:(tomorrow != None)">
-                <a class="pull-right" href="?time_travel=${tomorrow_num}">Next Day</a>
+                <a class="pull-right" href="${request.resource_url(tomorrow)}">Next Day</a>
             </tal:block>
             
             <br /><br />

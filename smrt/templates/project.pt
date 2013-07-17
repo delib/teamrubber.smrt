@@ -7,8 +7,8 @@
             <h2>Milestones</h2>
             <h5 tal:condition="not:exist">No milestones are currently configured. <a href="${addurl}">Add one?</a></h5>
             <ul tal:condition="exist">
-                <li tal:repeat="mile_key project">
-                    <tal:block tal:define="milestone project[mile_key]">
+                <li tal:repeat="mile_key project.milestones">
+                    <tal:block tal:define="milestone project.milestones[mile_key]">
                         <a href="/${project.short_name}/${milestone.short_name}">${milestone.name}</a> [ <a href="/${project.short_name}/${milestone.short_name}/edit">Edit</a> / <a href="#" onclick="javascript:if(confirm('Are you sure you want to delete the milestone ${project.name}?'))window.location.href='/${project.short_name}/${milestone.short_name}/remove';">Remove</a> ]
                     </tal:block>
                 </li>
