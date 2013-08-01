@@ -57,7 +57,14 @@ class IRC(object):
             if ("@" in message or self.nick in message) and "privmsg" in message.lower():
                 if "help" in message or "man" in message:
                     user_str = ":%s!%s@smrt PRIVMSG %s :" % (self.nick, self.ident, self.chan)
-                    self.send(user_str + "Either send me the command 'refresh' or 'view <project> <milestone> <date>, not entering date will just show the latest day.")
+                    # Either send me the command 'refresh' or 'view <project> <milestone> <date>, not entering date will just show the latest day.
+                    self.send(user_str + "Help:")
+                    self.send(user_str + "* 'refresh' to reload the current screen")
+                    self.send(user_str + "* 'view <project> <milestone> <date>' to change the current view, exclude the date to show the latest day.")
+                    self.send(user_str + "* 'panels add row' to add a new panel row.")
+                    self.send(user_str + "* 'panels add col to <row_index> <web_address>' to add a new column to a row with an address")
+                    self.send(user_str + "* 'panels set row <row_index> col <col_index> <web_address>' to change the current view in a panel/row")
+                    self.send(user_str + "* 'panels clear' to reset back to a single panel")
                 else:
                     self.latest = message.split(self.chan + " :" + self.nick)[1]
         except Exception as e:
