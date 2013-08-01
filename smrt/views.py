@@ -167,6 +167,51 @@ class Views(BaseLayouts):
         
         return HTTPFound(location=self.request.resource_url(self.context.__parent__))
 
+    @view_config(route_name="view_day", context=PlanIO, renderer="templates/day.pt")
+    def day_view(self):
+        year = int(self.request.matchdict["year"])
+        month = int(self.request.matchdict["month"])
+        day = int(self.request.matchdict["day"])
+        date = datetime(year, month, day)
+        date_str = date.strftime("%d%m%Y")
+        days = []
+        for project in self.context.values():
+            if not isinstance(project, Project): continue
+            for milestone in project.milestones.values():
+                for day_key in milestone.days:
+                    if day_key == date_str:
+                        days.append(milestone.days[day_key])
+        # Do some clever maths :p
+        rem_total_tickets = rem_unpointed_tickets = rem_dev_points = rem_qa_points = 0
+        yest_total_tickets = yest_unpointed_tickets = yest_dev_points = yest_qa_points = 0
+        for day in days:
+            rem_total_tickets += day.rem_total_tickets
+            rem_unpointed_tickets += day.rem_unpointed_tickets
+            rem_dev_points += day.rem_dev_points
+            rem_qa_points += day.rem_qa_points
+            yest_total_tickets += day.yest_total_tickets
+            yest_unpointed_tickets += day.yest_unpointed_tickets
+            yest_dev_points += day.yest_dev_points
+            yest_qa_points += day.yest_qa_points
+        # Create a fake day
+        fake_day = {
+            "date": date,
+            "rem_total_tickets": rem_total_tickets,
+            "rem_unpointed_tickets": rem_unpointed_tickets,
+            "rem_dev_points": rem_dev_points,
+            "rem_qa_points": rem_qa_points,
+            "yest_total_tickets": yest_total_tickets,
+            "yest_unpointed_tickets": yest_unpointed_tickets,
+            "yest_dev_points": yest_dev_points,
+            "yest_qa_points": yest_qa_points,
+        }
+        return {
+            "today": fake_day,
+            "tomorrow": None,
+            "yesterday": None,
+            "milestone": None,
+        }
+
     @view_config(route_name="view_milestone_day", context=Day, renderer="templates/day.pt")
     @view_config(context=Day, renderer="templates/day.pt")
     def milestone_day_view(self):
