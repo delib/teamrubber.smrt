@@ -18,6 +18,7 @@ irc_port = ${config:irc_port}
 irc_bot_name = ${config:irc_bot_name}
 irc_bot_nick = ${config:irc_bot_nick}
 irc_channel = ${config:irc_channel}
+csv_folder = ${config:csv_folder}
 
 [server:main]
 use = egg:waitress#main

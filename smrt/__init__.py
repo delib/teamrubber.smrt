@@ -18,18 +18,21 @@ def main(global_config, **settings):
     """
     config = Configurator(root_factory=root_factory, settings=settings)
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_static_view('publish', 'publish', cache_max_age=3600)
+    config.add_static_view('publish', settings["csv_folder"], cache_max_age=3600)
     config.add_route("view_milestone_day", "/{project}/{milestone}/{year}/{month}/{day}", traverse="/{project}/{milestone}/{day}{month}{year}")
     config.scan()
 
     # Start IRC bot for controlling
-    IRC.host = settings["irc_host"]
-    IRC.port = int(settings["irc_port"])
-    IRC.nick = settings["irc_bot_nick"]
-    IRC.ident = settings["irc_bot_nick"]
-    IRC.realname = settings["irc_bot_name"]
-    IRC.chan = settings["irc_channel"]
-    bot = IRC()
+    try:
+        IRC.host = settings["irc_host"]
+        IRC.port = int(settings["irc_port"])
+        IRC.nick = settings["irc_bot_nick"]
+        IRC.ident = settings["irc_bot_nick"]
+        IRC.realname = settings["irc_bot_name"]
+        IRC.chan = settings["irc_channel"]
+        bot = IRC()
+    except Exception, e:
+        print "Failed to bring up IRC bot: %s" % e
 
     return config.make_wsgi_app()
 

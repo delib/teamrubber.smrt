@@ -1,2 +1,0 @@
-* This directory stores the exported CSV files from the scraper used for graphing the past performance
-* This file also acts to keep the "publish" folder in the GIT checkout so SMRT doesn't throw a wobbler when it starts exports
