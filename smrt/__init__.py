@@ -38,8 +38,9 @@ def main(global_config, **settings):
 
 # Handle for clean shutdown
 def signal_handler(signal, frame):
-    print "Caught kill signal - stopping bot"
-    bot.stop()
+    print "Stopping, hang on..."
+    if bot != None:
+        bot.stop()
     sys.exit()
 
 signal.signal(signal.SIGINT, signal_handler)

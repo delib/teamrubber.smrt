@@ -170,30 +170,26 @@ class Views(BaseLayouts):
     @view_config(route_name="view_milestone_day", context=Day, renderer="templates/day.pt")
     @view_config(context=Day, renderer="templates/day.pt")
     def milestone_day_view(self):
-        
+
         today = self.context
         milestone = self.context.__parent__
-        
-        # If yesterday or tomorrows date keys are weekends then jump appropriately
-        # Don't worry about future/before recording, next stage takes care of this
-        yest_date = (today.date - timedelta(days=1))
-        while yest_date.weekday() > 4:
-            yest_date -= timedelta(days=1)
-        tom_date = (today.date + timedelta(days=1))
-        while tom_date.weekday() > 4:
-            tom_date += timedelta(days=1)
-        
-        yest_date_key = yest_date.strftime("%d%m%Y")
-        tom_date_key = tom_date.strftime("%d%m%Y")
-        
-        yesterday = None
-        tomorrow = None
-        
-        if yest_date_key in milestone.days:
-            yesterday = milestone.days[yest_date_key]
-        if tom_date_key in milestone.days:
-            tomorrow = milestone.days[tom_date_key]
-        
+
+        # Find the nearest "yesterday" and "tomorrow" - we go to a max of a month
+        yesterday = tomorrow = None
+        for i in range(1,31):
+            if yesterday != None and tomorrow != None:
+                break
+            if yesterday == None:
+                yest_date = (today.date - timedelta(days=i))
+                yest_date_key = yest_date.strftime("%d%m%Y")
+                if yest_date_key in milestone.days:
+                    yesterday = milestone.days[yest_date_key]
+            if tomorrow == None:
+                tom_date = (today.date + timedelta(days=i))
+                tom_date_key = tom_date.strftime("%d%m%Y")
+                if tom_date_key in milestone.days:
+                    tomorrow = milestone.days[tom_date_key]
+
         return { 
             "today": today, 
             "milestone" : milestone,
