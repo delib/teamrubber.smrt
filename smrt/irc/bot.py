@@ -4,20 +4,18 @@ from threading import Thread
 
 class IRC(object):
 
-
-    host = ""
+    host = None
     port = 0
-    nick = ""
-    ident = ""
-    realname= ""
-    chan = "#"
+    nick = None
+    ident = None
+    realname= None
+    chan = None
     readbuffer = ""
     socket = None
     thread = None
     instance = None
     latest = None
     running = True
-
 
     def __init__(self):
         if IRC.instance == None:
@@ -51,7 +49,6 @@ class IRC(object):
 
                 
     def send(self, message):
-        print message
         self.socket.send(message + "\r\n")
 
 

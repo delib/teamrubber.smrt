@@ -1,36 +1,28 @@
-###
-# app configuration
-# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
-###
-
 [app:main]
 use = egg:smrt
 
-pyramid.reload_templates = false
+pyramid.reload_templates = ${config:debug}
 pyramid.debug_authorization = false
 pyramid.debug_notfound = false
 pyramid.debug_routematch = false
 pyramid.default_locale_name = en
-pyramid.includes =
-    pyramid_tm
+pyramid.includes = 
     pyramid_zodbconn
-
+    pyramid_tm
+    ${config:pyramid.includes}
 tm.attempts = 3
-zodbconn.uri = file://%(here)s/Data.fs?connection_cache_size=20000
+zodbconn.uri = ${config:zodbconn.uri}
 
-###
-# wsgi server configuration
-###
+irc_host = ${config:irc_host}
+irc_port = ${config:irc_port}
+irc_bot_name = ${config:irc_bot_name}
+irc_bot_nick = ${config:irc_bot_nick}
+irc_channel = ${config:irc_channel}
 
 [server:main]
 use = egg:waitress#main
-host = ${prod_serverconfig:hostname}
-port = ${prod_serverconfig:port}
-
-###
-# logging configuration
-# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/logging.html
-###
+host = ${config:hostname}
+port = ${config:port}
 
 [loggers]
 keys = root, smrt
@@ -42,11 +34,11 @@ keys = console
 keys = generic
 
 [logger_root]
-level = WARN
+level = ${config:loglevel_root}
 handlers = console
 
 [logger_smrt]
-level = WARN
+level = ${config:loglevel_smrt}
 handlers =
 qualname = smrt
 

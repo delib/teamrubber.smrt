@@ -169,7 +169,7 @@ class Views(BaseLayouts):
 
     @view_config(route_name="view_milestone_day", context=Day, renderer="templates/day.pt")
     @view_config(context=Day, renderer="templates/day.pt")
-    def day_view(self):
+    def milestone_day_view(self):
         
         today = self.context
         milestone = self.context.__parent__
@@ -200,7 +200,6 @@ class Views(BaseLayouts):
             "yesterday": yesterday,
             "tomorrow": tomorrow, 
         }
-
 
     @view_config(name="add_day", context=Milestone, renderer="templates/add_day.pt")
     def add_day_view(self):

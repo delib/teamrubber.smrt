@@ -21,10 +21,16 @@ def main(global_config, **settings):
     config.add_static_view('publish', 'publish', cache_max_age=3600)
     config.add_route("view_milestone_day", "/{project}/{milestone}/{year}/{month}/{day}", traverse="/{project}/{milestone}/{day}{month}{year}")
     config.scan()
-    
+
     # Start IRC bot for controlling
+    IRC.host = settings["irc_host"]
+    IRC.port = int(settings["irc_port"])
+    IRC.nick = settings["irc_bot_nick"]
+    IRC.ident = settings["irc_bot_nick"]
+    IRC.realname = settings["irc_bot_name"]
+    IRC.chan = settings["irc_channel"]
     bot = IRC()
-    
+
     return config.make_wsgi_app()
 
 # Handle for clean shutdown
