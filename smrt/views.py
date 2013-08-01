@@ -167,7 +167,7 @@ class Views(BaseLayouts):
         
         return HTTPFound(location=self.request.resource_url(self.context.__parent__))
 
-    
+    @view_config(route_name="view_milestone_day", context=Day, renderer="templates/day.pt")
     @view_config(context=Day, renderer="templates/day.pt")
     def day_view(self):
         

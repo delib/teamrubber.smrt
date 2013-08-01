@@ -19,6 +19,7 @@ def main(global_config, **settings):
     config = Configurator(root_factory=root_factory, settings=settings)
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('publish', 'publish', cache_max_age=3600)
+    config.add_route("view_milestone_day", "/{project}/{milestone}/{year}/{month}/{day}", traverse="/{project}/{milestone}/{day}{month}{year}")
     config.scan()
     
     # Start IRC bot for controlling
@@ -28,6 +29,7 @@ def main(global_config, **settings):
 
 # Handle for clean shutdown
 def signal_handler(signal, frame):
+    print "Caught kill signal - stopping bot"
     bot.stop()
     sys.exit()
 
