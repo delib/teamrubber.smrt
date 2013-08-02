@@ -164,8 +164,8 @@ class Scraper(object):
             
                 # Check file exists
                 log = None
-                here = os.path.dirname(os.path.abspath(__file__))
-                log = open(here + "/publish/%s-%s.csv" % (project.short_name, milestone.short_name), "a")
+                here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                log = open(os.path.join(here, "/var/csv/%s-%s.csv" % (project.short_name, milestone.short_name), "a"))
             
                 # Write a text log entry that we can then plot from on the index page
                 log.write(logtext)
