@@ -20,7 +20,9 @@ def main(global_config, **settings):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('publish', settings["csv_folder"], cache_max_age=3600)
     config.add_route("view_milestone_day", "/{project}/{milestone}/{year}/{month}/{day}", traverse="/{project}/{milestone}/{day}{month}{year}")
-    config.add_route("view_day", "/{year}/{month}/{day}")
+    config.add_route("view_day", "/period/{year}/{month}/{day}")
+    config.add_route("view_month", "/period/{year}/{month}")
+    config.add_route("view_year", "/period/{year}")
     config.scan()
 
     # Start IRC bot for controlling

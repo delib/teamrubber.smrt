@@ -12,6 +12,7 @@
                 $.get("/publish/${milestone.__parent__.short_name}-${milestone.short_name}.csv", function(data) {
                     var lines = $.csv.toArrays(data);
                     var series = translateArraysToSeries(lines);
+                    console.log(series);
                     plotChart(series);
                 }, "text").fail(
                     function(jqxhr, status, message)
@@ -24,6 +25,13 @@
             
             });
         </script>
+        <script tal:condition="period">
+            $(document).ready(function() {
+                var series = ${chart_data};
+                console.log(series);
+                plotChart(series);
+            });
+        </script>
         
         <!-- Refresh automatically every once in a while -->
         <meta http-equiv="refresh" content="600; URL=${request.resource_url(milestone)}" />
@@ -34,8 +42,8 @@
     
         <div class="container">
             <h2 tal:condition="python:(milestone != None)">Stats for ${milestone.name} on ${today.date.strftime("%d/%m/%Y")}</h2>
-            <h2 tal:condition="python:(milestone == None)">Stats for ${today.date.strftime("%d/%m/%Y")}</h2>
-            <div class="remaining">
+            <h2 tal:condition="python:(milestone == None)">Stats for ${date_str}</h2>
+            <div class="remaining" tal:condition="not:period">
                 <h3>Remaining:</h3>
                 <table class="table table-bordered" style="font-size: 24px;">
                   <thead>
@@ -60,7 +68,8 @@
             </div>
             <br />
             <div class="completed small">
-                <h3>Completed yesterday (or nearest weekday)</h3>
+                <h3 tal:condition="not:period">Completed yesterday (or nearest weekday)</h3>
+                <h3 tal:condition="period">Completed within the period</h3>
                 <table class="table table-bordered" style="font-size: 24px;">
                   <thead>
                     <tr style="background: #eaeaea;">

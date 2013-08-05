@@ -18,7 +18,7 @@ TV.checkup = function() {
     $.get("/irc_last", function(data) {
         try {
             TV.last = data.replace(": ", "");
-            console.log(TV.last);
+            //console.log(TV.last);
             if(TV.last.indexOf("refresh") >= 0) document.location.reload(true);
             else if(TV.last.indexOf("view") >= 0) {
                 area = TV.last.split("view ")[1];
