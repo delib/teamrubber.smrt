@@ -2,18 +2,17 @@
     <tal:block metal:fill-slot="content">
     
         <div class="container centered">
-            <h1>Project: ${project.name}</h1>
+            <h1>Project: ${project.title}</h1>
             <br />
             <h2>Milestones</h2>
-            <h5 tal:condition="not:exist">No milestones are currently configured. <a href="${addurl}">Add one?</a></h5>
+            <h5 tal:condition="not:exist">No milestones are currently configured.</h5>
             <ul tal:condition="exist">
                 <li tal:repeat="mile_key project.milestones">
                     <tal:block tal:define="milestone project.milestones[mile_key]">
-                        <a href="/${project.short_name}/${milestone.short_name}">${milestone.name}</a> [ <a href="/${project.short_name}/${milestone.short_name}/edit">Edit</a> / <a href="#" onclick="javascript:if(confirm('Are you sure you want to delete the milestone ${project.name}?'))window.location.href='/${project.short_name}/${milestone.short_name}/remove';">Remove</a> ]
+                        <a href="/${project.__name__}/${milestone.__name__}">${milestone.title}</a>
                     </tal:block>
                 </li>
                 <br />
-                <li><a href="${addurl}">Add Another Milestone</a></li>
             </ul>
         </div>
         

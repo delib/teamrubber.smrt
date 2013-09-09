@@ -4,6 +4,9 @@ import csv
 from datetime import datetime, timedelta
 import StringIO
 import urllib, urllib2, os
+from redmine import Redmine
+
+rubber = Redmine("https://teamrubber.plan.io", key='6be8066d90ab38eca7a3edd2412dab92ae54c2eb', version=1.4)
 
 class Scraper(object):
     
@@ -34,8 +37,19 @@ class Scraper(object):
         ]
         
         # Run the actual update
+        available_projects = set(project.identifier for project in rubber.projects)
+        missing_projects = available_projects - set(PlanIORoot.keys())
+        for project in missing_projects:
+            PlanIORoot.add_project(rubber.projects[project])
+        
         for project_key in PlanIORoot:
             project = PlanIORoot[project_key]
+            available_milestones = set(milestone.id for milestone in rubber.projects[project_key].versions)
+            missing_milestones = available_milestones - set(project.milestones)
+            
+            for milestone in missing_milestones:
+                project.add_milestone(rubber.projects[project_key].versions[milestone])
+
             for milestone_key in project.milestones:
             
                 milestone = project[milestone_key]
@@ -46,35 +60,8 @@ class Scraper(object):
                 # Don't run twice on the same day!
                 if today.strftime("%d%m%Y") in milestone.days:
                     continue
-            
-                # Build an opener which accepts cookies
-                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
-                urllib2.install_opener(opener)
-            
-                # Form the request
-                login_params = urllib.urlencode({
-                    'username': project.username, 
-                    'password': project.password,
-                })
                 
-                f = opener.open('https://teamrubber.plan.io/login', login_params)
-                data = f.read()
-                f.close()
-            
-                # Now attempt to load the protected page
-                csv_url = """https://teamrubber.plan.io/projects/%s/issues.csv?c[]=tracker&c[]=status&c[]=priority&c[]=subject&c[]=assigned_to&c[]=updated_on&c[]=cf_2&c[]=cf_3&c[]=cf_1&f[]=status_id&f[]=fixed_version_id&f[]=&group_by=status&op[fixed_version_id]=%%3D&op[status_id]=%%2A&set_filter=1&v[fixed_version_id][]=%s""" % (project.short_name, milestone.mile_id)
-                f = opener.open(csv_url)
-                csv_file = StringIO.StringIO(f.read())
-                f.close()
-            
-                # Now read that into a dict
-                data = csv.DictReader(csv_file)
-                
-                daystocheck = 1
-
-                if today.weekday() == 0: # Monday
-                    daystocheck = 3
-                yesterday = today - timedelta(days=daystocheck)
+                issues = list(rubber.projects[project_key].issues.query(fixed_version_id=milestone.__name__, status_id='*'))
 
                 tickets = {
                     'total': {'count': 0, 'devp': 0, 'qap': 0, 'unp': 0},
@@ -82,23 +69,18 @@ class Scraper(object):
                     'inprogress': {'count': 0, 'devp': 0, 'qap': 0, 'unp': 0},
                     'finished': {'count': 0, 'devp': 0, 'qap': 0, 'unp': 0},
                 }
-                delta = {
-                    'backlog': {'count': 0, 'devp': 0, 'qap': 0, 'unp': 0},
-                    'inprogress': {'count': 0, 'devp': 0, 'qap': 0, 'unp': 0},
-                    'finished': {'count': 0, 'devp': 0, 'qap': 0, 'unp': 0},
-                }
 
-                for ticket in data:
+                for issue in issues:
                     # Get the details out for ease of reference
-                    status = ticket['Status']
-                    dev = ticket['Points (dev)']
+                    status = issue.status.name
+                    dev = issue.custom_fields['Points (dev)']
                     haspoints = False
                     if dev:
                         haspoints = True
                         dev = int(dev)
                     else:
                         dev = 0
-                    qa = ticket['Points (QA)']
+                    qa = issue.custom_fields['Points (QA)']
                     if qa:
                         haspoints = True
                         qa = int(qa)
@@ -125,28 +107,16 @@ class Scraper(object):
                         tickets[key]['qap'] += qa
                         if not haspoints:
                             tickets[key]['unp'] += 1
-    
-                    updated = ticket['Updated']
+                    updated = issue.updated_on
                     # Turn updated into a datetime
-                    updated = datetime.strptime(updated, "%d %b %Y %I:%M %p")
-                    if updated > yesterday and updated < today:
-                        if key:
-                            delta[key]['count'] += 1
-                            delta[key]['devp'] += dev
-                            delta[key]['qap'] += qa
-                            if not haspoints:
-                                delta[key]['unp'] += 1
-        
+                
                 rem_total = tickets['inprogress']['count'] + tickets['backlog']['count']
                 rem_unpointed = tickets['inprogress']['unp'] + tickets['backlog']['unp']
                 rem_dev_pt = tickets['inprogress']['devp'] + tickets['backlog']['devp']
                 rem_qa_pt = tickets['inprogress']['qap'] + tickets['backlog']['qap']
-                yest_total = delta['finished']['count']
-                yest_unpointed = delta['finished']['unp']
-                yest_dev_pt = delta['finished']['devp']
-                yest_qa_pt = delta['finished']['qap']
-            
-                day = Day(today, rem_total, rem_unpointed, rem_dev_pt, rem_qa_pt, yest_total, yest_unpointed, yest_dev_pt, yest_qa_pt)
+                
+                
+                day = Day(today, rem_total, rem_unpointed, rem_dev_pt, rem_qa_pt)
                 day.__name__ = today.strftime("%d%m%Y")
                 day.__parent__ = milestone
                 milestone.days[day.__name__] = day
@@ -162,11 +132,4 @@ class Scraper(object):
                     tickets['inprogress']['devp'] + tickets['backlog']['devp'] + tickets['inprogress']['qap'] + tickets['backlog']['qap']
                 )
             
-                # Check file exists
-                log = None
-                here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                log = open(os.path.join(here, "var/csv/%s-%s.csv" % (project.short_name, milestone.short_name)), "a")
-            
-                # Write a text log entry that we can then plot from on the index page
-                log.write(logtext)
-                log.close()
+                

@@ -7,31 +7,6 @@
         <link rel="stylesheet" type="text/css" href="/static/js/jquery.jqplot.min.css" />
         <script language="javascript" type="text/javascript" src="/static/js/jquery.csv.min.js"></script>
         <script language="javascript" type="text/javascript" src="/static/js/teamrubber.series.js"></script>
-        <script tal:condition="python:(milestone != None)">
-            $(function(){
-                $.get("/publish/${milestone.__parent__.short_name}-${milestone.short_name}.csv", function(data) {
-                    var lines = $.csv.toArrays(data);
-                    var series = translateArraysToSeries(lines);
-                    console.log(series);
-                    plotChart(series);
-                }, "text").fail(
-                    function(jqxhr, status, message)
-                    {
-                        console.log(jqxhr);
-                        console.log(status);
-                        console.log(message);
-                    }
-                );
-            
-            });
-        </script>
-        <script tal:condition="period">
-            $(document).ready(function() {
-                var series = ${chart_data};
-                console.log(series);
-                plotChart(series);
-            });
-        </script>
         
         <!-- Refresh automatically every once in a while -->
         <meta http-equiv="refresh" content="600; URL=${request.resource_url(milestone)}" />
@@ -41,7 +16,7 @@
     <tal:block metal:fill-slot="content">
     
         <div class="container">
-            <h2 tal:condition="python:(milestone != None)">Stats for ${milestone.name} on ${today.date.strftime("%d/%m/%Y")}</h2>
+            <h2 tal:condition="python:(milestone != None)">Stats for ${milestone.title} on ${today.date.strftime("%d/%m/%Y")}</h2>
             <h2 tal:condition="python:(milestone == None)">Stats for ${date_str}</h2>
             <div class="remaining" tal:condition="not:period">
                 <h3>Remaining:</h3>
@@ -67,30 +42,9 @@
                 </table>
             </div>
             <br />
-            <div class="completed small">
-                <h3 tal:condition="not:period">Completed yesterday (or nearest weekday)</h3>
-                <h3 tal:condition="period">Completed within the period</h3>
-                <table class="table table-bordered" style="font-size: 24px;">
-                  <thead>
-                    <tr style="background: #eaeaea;">
-                        <th>Total Tickets</th>
-                        <th>Unpointed tickets</th>
-                        <th>Dev Points</th>
-                        <th>QA Points</th>
-                        <th>Total Points</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                        <td>${today.yest_total_tickets}</td>
-                        <td>${today.yest_unpointed_tickets}</td>
-                        <td>${today.yest_dev_points}</td>
-                        <td>${today.yest_qa_points}</td>
-                        <td>${today.yest_dev_points + today.yest_qa_points}</td>
-                    </tr>
-                  </tbody>
-                </table>
-            </div>
+
+
+
             <div id="points"></div>
             <br />
             <div id="tickets"></div>
