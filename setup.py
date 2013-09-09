@@ -15,6 +15,7 @@ requires = [
     'ZODB3',
     'waitress',
     'pyredmine',
+    'pygal',
     ]
 
 setup(name='smrt',

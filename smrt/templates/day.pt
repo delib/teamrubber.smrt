@@ -30,20 +30,42 @@
                         <th>Total Points</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody tal:define="totals today.totals">
                     <tr>
-                        <td>${today.rem_total_tickets}</td>
-                        <td>${today.rem_unpointed_tickets}</td>
-                        <td>${today.rem_dev_points}</td>
-                        <td>${today.rem_qa_points}</td>
-                        <td>${today.rem_dev_points + today.rem_qa_points}</td>
+                        <td>${len(totals['tickets'])}</td>
+                        <td>${len(totals['unp'])}</td>
+                        <td>${totals['devp']}</td>
+                        <td>${totals['qap']}</td>
+                        <td>${totals['devp'] + totals['qap']}</td>
                     </tr>
                   </tbody>
                 </table>
             </div>
             <br />
 
-
+            <div class="completed small" tal:condition="not:period">
+                <h3>Completed yesterday:</h3>
+                <table class="table table-bordered" style="font-size: 24px;">
+                  <thead>
+                    <tr style="background: #eaeaea;">
+                        <th>Total Tickets</th>
+                        <th>Unpointed tickets</th>
+                        <th>Dev Points</th>
+                        <th>QA Points</th>
+                        <th>Total Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                        <td>${len(diff['tickets'])}</td>
+                        <td>${len(diff['unp'])}</td>
+                        <td>${diff['devp']}</td>
+                        <td>${diff['qap']}</td>
+                        <td>${diff['devp'] + diff['qap']}</td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
 
             <div id="points"></div>
             <br />
@@ -51,11 +73,12 @@
             <p class="small text-right muted">Page generated: ${today.date.isoformat()}</p>
             
             <br />
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" tal:content="structure chart" height="300px" />
             
-            <tal:block tal:condition="python:(yesterday != None)">
+            <tal:block tal:condition="python:(yesterday is not None)">
                 <a class="pull-left" href="${request.resource_url(yesterday)}">Previous Day</a>
             </tal:block>
-            <tal:block tal:condition="python:(tomorrow != None)">
+            <tal:block tal:condition="python:(tomorrow is not None)">
                 <a class="pull-right" href="${request.resource_url(tomorrow)}">Next Day</a>
             </tal:block>
             

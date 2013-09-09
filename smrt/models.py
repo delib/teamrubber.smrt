@@ -25,7 +25,6 @@ class Project(Persistent):
         milestone = Milestone(milestone.name, milestone.id)
         milestone.__parent__ = self
         self.milestones[milestone.__name__] = milestone
-        print "Added milestone %s" % milestone
 
 
 class Milestone(Persistent):
@@ -36,27 +35,71 @@ class Milestone(Persistent):
         self.date_added = datetime.datetime.now()
         self.date_updated = None
         self.days = PersistentMapping()
+        self.status = u'open'
         self.short_name = name.lower().replace(" ","-").strip("?;!.&'\"/\\@")
+    
+    def add_day(self, day):
+        day.__parent__ = self
+        self.days[day.__name__] = day
     
     # Fiddle with the traversal to look in the days
     def __getitem__(self, key):
         return self.days.__getitem__(key)
     
+    def shortrepr(self):
+        return "%s:%s" % (self.__parent__.__name__, self.__name__)
+    
     def __repr__(self):
-        return "Milestone: " + str(self.__name__) + ", added on date: " + str(self.date_added)
+        return "<milestone %s>" % str(self.shortrepr())
 
 class Day(Persistent):
     
-    def __init__(self, date, rem_total_tickets, rem_unpointed_tickets, rem_dev_points, rem_qa_points):
+    def __init__(self, date, issues):
+        try:
+            date = date.date()
+        except AttributeError:
+            pass
+        self.__name__ = date.isoformat()
         self.date = date
         # Remaining
-        self.rem_total_tickets = rem_total_tickets
-        self.rem_unpointed_tickets = rem_unpointed_tickets
-        self.rem_dev_points = rem_dev_points
-        self.rem_qa_points = rem_qa_points
+        self.issues = issues
+    
+    @property
+    def previous(self):
+        sorted_days = sorted(self.__parent__.days.keys())
+        index = sorted_days.index(self.__name__)
+        if index <= 0:
+            return None
+        return self.__parent__.days[sorted_days[index-1]]
+        
+    @property
+    def next(self):
+        sorted_days = sorted(self.__parent__.days.keys())
+        index = sorted_days.index(self.__name__)
+        try:
+            return self.__parent__.days[sorted_days[index+1]]
+        except:
+            return None
+    
+    @property
+    def totals(self):
+        totals = {}
+        for state in self.issues:
+            if state == 'finished':
+                continue
+            for key, value in self.issues[state].items():
+                if key not in totals:
+                    totals[key] = value
+                else:
+                    try:
+                        totals[key] += value
+                    except:
+                        # Damn you, set signature.
+                        totals[key] = totals[key].union(value)
+        return totals
     
     def __repr__(self):
-        return "Day: " + str(self.date) + " of Milestone: " + str(self.__parent__.__name__)
+        return "<day %s of milestone %s> " % (str(self.date), self.__parent__.shortrepr())
 
 def appmaker(zodb_root):
     if not 'app_root' in zodb_root:

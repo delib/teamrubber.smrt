@@ -9,6 +9,7 @@
             <ul tal:condition="exist">
                 <li tal:repeat="mile_key project.milestones">
                     <tal:block tal:define="milestone project.milestones[mile_key]">
+                        <span class="label label-${['info','success'][milestone.status=='open']}">${milestone.status}</span>
                         <a href="/${project.__name__}/${milestone.__name__}">${milestone.title}</a>
                     </tal:block>
                 </li>
