@@ -5,7 +5,11 @@
             <h1>Simple Milestone Reporting Tool</h1>
             <br />
             <h2>Projects</h2>
-            <h5 tal:condition="not:exist">No projects found.</h5>
+            <div tal:condition="not:exist">
+                <h5>No projects found.</h5>
+                <a href="/historical">Attempt to populate old data</a>
+            </div>
+            
             <ul tal:condition="exist">
                 <li tal:repeat="project_key projects">
                     <tal:block tal:define="project projects[project_key]">

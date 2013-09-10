@@ -85,6 +85,14 @@ class Views(BaseLayouts):
     def refresh_view(self):
 
         scrape = Scraper()
+        scrape.grabData(self.context)
+
+        return HTTPFound(location="/")
+
+    @view_config(name="historical", context=PlanIO)
+    def refresh_view(self):
+
+        scrape = Scraper()
         scrape.populateHistorical(self.context)
 
         return HTTPFound(location="/")

@@ -161,15 +161,15 @@ class Scraper(object):
                 milestone.date_updated = today
                 
     def populateHistorical(self, PlanIORoot):
-        #self.grabData(PlanIORoot)
+        self.grabData(PlanIORoot)
         
-        issues = rubber.projects['citizen-space'].issues
+        issues = rubber.issues
         # Include changes to the issue
         issues._item_path = '/issues/%s.json?include=journals'
         
         all_data = {}
         
-        for issue in issues.query(fixed_version_id='34', status_id='*'):
+        for issue in issues:
             # Get the journal
             log.debug("Attempting to find history for %s" % issue)
             issue = issues[issue.id]
