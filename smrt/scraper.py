@@ -169,7 +169,7 @@ class Scraper(object):
         
         all_data = {}
         
-        for issue in issues:
+        for issue in issues.query(status_id="*"):
             # Get the journal
             log.debug("Attempting to find history for %s" % issue)
             issue = issues[issue.id]
