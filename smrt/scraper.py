@@ -32,6 +32,7 @@ def add_to_all_data(all_data, milestone=None, isodate=None):
 
 def remove_ticket_from(all_data, milestone, isodate, state, issue_id, guessed_dev_points, guessed_qa_points):
     data = add_to_all_data(all_data, milestone, isodate)[state]
+    log.info("%s - removing %s from %s (%s %d %d)" % (isodate, issue_id, milestone, state, guessed_dev_points, guessed_qa_points))
     data['devp'] -= guessed_dev_points
     data['qap'] -= guessed_qa_points
     if issue_id in data['ticket_added']:
@@ -41,6 +42,7 @@ def remove_ticket_from(all_data, milestone, isodate, state, issue_id, guessed_de
 
 def add_ticket_to(all_data, milestone, isodate, state, issue_id, guessed_dev_points, guessed_qa_points):
     data = add_to_all_data(all_data, milestone, isodate)[state]
+    log.info("%s - adding %s to %s (%s %d %d)" % (isodate, issue_id, milestone, state, guessed_dev_points, guessed_qa_points))
     data['devp'] += guessed_dev_points
     data['qap'] += guessed_qa_points
     if issue_id in data['ticket_removed']:
@@ -159,15 +161,15 @@ class Scraper(object):
                 milestone.date_updated = today
                 
     def populateHistorical(self, PlanIORoot):
-        self.grabData(PlanIORoot)
+        #self.grabData(PlanIORoot)
         
-        issues = rubber.projects['budget-simulator'].issues
+        issues = rubber.projects['citizen-space'].issues
         # Include changes to the issue
         issues._item_path = '/issues/%s.json?include=journals'
         
         all_data = {}
         
-        for issue in issues.query(fixed_version_id='47', status_id='*'):
+        for issue in issues.query(fixed_version_id='34', status_id='*'):
             # Get the journal
             log.debug("Attempting to find history for %s" % issue)
             issue = issues[issue.id]
@@ -194,28 +196,29 @@ class Scraper(object):
                 log.debug("%s is not currently in a milestone" % (issue) )
                 guessed_milestone = None
             
+            
+            created_in_milestone_with_points = True
+            
             for journal in reversed(issue.journals):
                 isodate = journal['created_on'].split(" ")[0].replace("/",'-')
                 
                 old_milestone = guessed_milestone
                 old_status = guessed_status
                 old_dev_points = guessed_dev_points
-                old_qa_points = guessed_dev_points
+                old_qa_points = guessed_qa_points
                 old_state = state
+                
                 
                 for detail in journal['details']:
                     
                     if detail['name'] == 'fixed_version_id':
                         log.debug("Guessing milestone %s due to %s" % (guessed_milestone, detail))                            
-                        if guessed_milestone is not None:
-                            remove_ticket_from(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                         guessed_milestone = detail.get('old_value', None)
                         if guessed_milestone is not None:
+                            created_in_milestone_with_points = False
                             guessed_milestone = int(guessed_milestone)
-                            add_ticket_to(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                     
                     if detail['name'] == 'status_id':
-                        remove_ticket_from(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                         guessed_status = int(detail.get('old_value', None))
                         if guessed_status in self.status_backlog:
                             state = 'backlog'
@@ -224,26 +227,33 @@ class Scraper(object):
                         if guessed_status in self.status_done:
                             state = 'finished'
                         log.debug("Ticket %s is now %s (dev %d qa %d)" % (issue, state, guessed_dev_points, guessed_qa_points))
-                        add_ticket_to(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                         
                     if detail['property'] == 'cf' and detail['name'] == '2':
                         # DEV points
-                        remove_ticket_from(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                         guessed_dev_points = int(detail.get('old_value') or '0')
                         log.debug("Repointing %s to %s (DEV)" % (issue, guessed_dev_points))
-                        add_ticket_to(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
+                        created_in_milestone_with_points = False
                     if detail['property'] == 'cf' and detail['name'] == '3':
                         # QA points
-                        remove_ticket_from(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                         guessed_qa_points = int(detail.get('old_value') or '0')
                         log.debug("Repointing %s to %s (QA)" % (issue, guessed_qa_points))
-                        add_ticket_to(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
+                        created_in_milestone_with_points = False
                     
+                
+                if old_milestone == guessed_milestone and old_state == state and old_dev_points == guessed_dev_points and old_qa_points == guessed_qa_points:
+                    continue
+                if old_milestone is not None:
+                    remove_ticket_from(all_data, old_milestone, isodate, old_state, issue.id, old_dev_points, old_qa_points)
+                if guessed_milestone is not None:
+                    add_ticket_to(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
                 if not guessed_qa_points and not guessed_dev_points:
                     log.debug("%s is unpointed" % (issue))
                     if guessed_milestone:
                         add_to_all_data(all_data, guessed_milestone, isodate)[state]['unp'].add(issue.id)
-    
+            if created_in_milestone_with_points and guessed_milestone is not None:
+                # This wasn't transfered in, so add it now.
+                remove_ticket_from(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
+        
         for project_key in PlanIORoot:
             project = PlanIORoot[project_key]
             for milestone_key in project.milestones:
