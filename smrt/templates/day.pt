@@ -4,7 +4,9 @@
         <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/static/js/excanvas.min.js"></script><![endif]-->
         <script language="javascript" type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
         <script type="text/javascript" src="/static/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="/static/js/jquery.jqplot.min.css" />
+ <script type="text/javascript" src="http://kozea.github.com/pygal.js/javascripts/svg.jquery.js"></script>
+  <script type="text/javascript" src="http://kozea.github.com/pygal.js/javascripts/pygal-tooltips.js"></script>
+         <link rel="stylesheet" type="text/css" href="/static/js/jquery.jqplot.min.css" />
         <script language="javascript" type="text/javascript" src="/static/js/jquery.csv.min.js"></script>
         <script language="javascript" type="text/javascript" src="/static/js/teamrubber.series.js"></script>
         
@@ -73,7 +75,7 @@
             <p class="small text-right muted">Page generated: ${today.date.isoformat()}</p>
             
             <br />
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" tal:content="structure chart" height="300px" />
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" tal:replace="structure chart" />
             
             <tal:block tal:condition="python:(yesterday is not None)">
                 <a class="pull-left" href="${request.resource_url(yesterday)}">Previous Day</a>
