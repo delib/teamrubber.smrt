@@ -8,6 +8,7 @@ import StringIO
 import urllib, urllib2, os
 from redmine import Redmine
 import logging
+import itertools
 
 log = logging.getLogger('smrt')
 
@@ -35,6 +36,10 @@ def remove_ticket_from(all_data, milestone, isodate, state, issue_id, guessed_de
     log.info("%s - removing %s from %s (%s %d %d)" % (isodate, issue_id, milestone, state, guessed_dev_points, guessed_qa_points))
     data['devp'] -= guessed_dev_points
     data['qap'] -= guessed_qa_points
+    
+    if issue_id in data['ticket_removed']:
+        import pdb; pdb.set_trace()
+    
     if issue_id in data['ticket_added']:
         data['ticket_added'].remove(issue_id)
     else:
@@ -45,10 +50,16 @@ def add_ticket_to(all_data, milestone, isodate, state, issue_id, guessed_dev_poi
     log.info("%s - adding %s to %s (%s %d %d)" % (isodate, issue_id, milestone, state, guessed_dev_points, guessed_qa_points))
     data['devp'] += guessed_dev_points
     data['qap'] += guessed_qa_points
+    
+    if issue_id in data['ticket_added']:
+        import pdb; pdb.set_trace()
+    
+    
     if issue_id in data['ticket_removed']:
         data['ticket_removed'].remove(issue_id)
     else:
         data['ticket_added'].add(issue_id)
+    
 
 class Scraper(object):
     
@@ -163,13 +174,16 @@ class Scraper(object):
     def populateHistorical(self, PlanIORoot):
         self.grabData(PlanIORoot)
         
-        issues = rubber.issues
+        issues = rubber.issues#projects['budget-simulator'].issues
         # Include changes to the issue
         issues._item_path = '/issues/%s.json?include=journals'
         
         all_data = {}
-        
-        for issue in issues.query(status_id="*"):
+        for issue in issues.query(status_id='*'):
+            latest = {}
+            current = {}
+            older = {}
+            
             # Get the journal
             log.debug("Attempting to find history for %s" % issue)
             issue = issues[issue.id]
@@ -178,81 +192,94 @@ class Scraper(object):
                 log.debug("No history for %s" % issue)
                 continue
             
-            guessed_status = issue.status.id
-            guessed_dev_points = int(issue.custom_fields['Points (dev)'] or '0')
-            guessed_qa_points = int(issue.custom_fields['Points (QA)'] or '0')
-
-            if guessed_status in self.status_backlog:
-                state = 'backlog'
-            if guessed_status in self.status_in_progress:
-                state = 'inprogress'
-            if guessed_status in self.status_done:
-                state = 'finished'
-            
             try:
-                guessed_milestone = issue.fixed_version.id
-                log.debug("Guessing milestone %s" % (guessed_milestone) )
+                latest['milestone'] = issue.fixed_version.id
             except:
-                log.debug("%s is not currently in a milestone" % (issue) )
-                guessed_milestone = None
+                latest['milestone'] = None
+            latest['status'] = issue.status.id
+            latest['dev_points'] = int(issue.custom_fields['Points (dev)'] or '0')
+            latest['qa_points'] = int(issue.custom_fields['Points (QA)'] or '0')
+
+            if latest['status'] in self.status_backlog:
+                latest['state'] = 'backlog'
+            if latest['status'] in self.status_in_progress:
+                latest['state'] = 'inprogress'
+            if latest['status'] in self.status_done:
+                latest['state'] = 'finished'
+            del latest['status']
+            current = latest
             
-            
-            created_in_milestone_with_points = True
-            
-            for journal in reversed(issue.journals):
-                isodate = journal['created_on'].split(" ")[0].replace("/",'-')
+            for day in itertools.groupby(reversed(issue.journals), lambda x:x['created_on'].split(' ')[0]):
+                older = copy.copy(current)
                 
-                old_milestone = guessed_milestone
-                old_status = guessed_status
-                old_dev_points = guessed_dev_points
-                old_qa_points = guessed_qa_points
-                old_state = state
+                for journal in day[1]:
+                    isodate = journal['created_on'].split(" ")[0].replace("/",'-')
                 
-                
-                for detail in journal['details']:
                     
-                    if detail['name'] == 'fixed_version_id':
-                        log.debug("Guessing milestone %s due to %s" % (guessed_milestone, detail))                            
-                        guessed_milestone = detail.get('old_value', None)
-                        if guessed_milestone is not None:
-                            created_in_milestone_with_points = False
-                            guessed_milestone = int(guessed_milestone)
+                    for detail in journal['details']:
                     
-                    if detail['name'] == 'status_id':
-                        guessed_status = int(detail.get('old_value', None))
-                        if guessed_status in self.status_backlog:
-                            state = 'backlog'
-                        if guessed_status in self.status_in_progress:
-                            state = 'inprogress'
-                        if guessed_status in self.status_done:
-                            state = 'finished'
-                        log.debug("Ticket %s is now %s (dev %d qa %d)" % (issue, state, guessed_dev_points, guessed_qa_points))
+                        if detail['name'] == 'fixed_version_id':
+                            older['milestone'] = detail.get('old_value', None)
                         
-                    if detail['property'] == 'cf' and detail['name'] == '2':
-                        # DEV points
-                        guessed_dev_points = int(detail.get('old_value') or '0')
-                        log.debug("Repointing %s to %s (DEV)" % (issue, guessed_dev_points))
-                        created_in_milestone_with_points = False
-                    if detail['property'] == 'cf' and detail['name'] == '3':
-                        # QA points
-                        guessed_qa_points = int(detail.get('old_value') or '0')
-                        log.debug("Repointing %s to %s (QA)" % (issue, guessed_qa_points))
-                        created_in_milestone_with_points = False
+                            #if unicode(detail.get('new_value') or 'None') != unicode(current['milestone']):
+                            #    import pdb; pdb.set_trace()
+                        
+                            log.debug("Guessing milestone %s due to %s" % (older['milestone'], detail))                            
+                            if older['milestone'] is not None:
+                                older['milestone'] = int(older['milestone'])
+                    
+                        if detail['name'] == 'status_id':
+                            older['status'] = int(detail.get('old_value', None))
+                            if older['status'] in self.status_backlog:
+                                older['state'] = 'backlog'
+                            if older['status'] in self.status_in_progress:
+                                older['state'] = 'inprogress'
+                            if older['status'] in self.status_done:
+                                older['state'] = 'finished'
+                            del older['status']
+                        
+                        if detail['property'] == 'cf' and detail['name'] == '2':
+                            # DEV points
+                        
+                            #if unicode(detail.get('new_value') or '0') != unicode(current['dev_points']):
+                            #    import pdb; pdb.set_trace()
+
+                            older['dev_points'] = int(detail.get('old_value') or '0')
+                            log.debug("Repointing %s to %s (DEV)" % (issue, older['dev_points']))
+                        if detail['property'] == 'cf' and detail['name'] == '3':
+                            # QA points
+                        
+                            #if unicode(detail.get('new_value') or '0') != unicode(current['qa_points']):
+                            #    import pdb; pdb.set_trace()
+                            print detail
+                            older['qa_points'] = int(detail.get('old_value') or '0')
+                            log.debug("Repointing %s to %s (QA)" % (issue, older['qa_points']))
                     
                 
-                if old_milestone == guessed_milestone and old_state == state and old_dev_points == guessed_dev_points and old_qa_points == guessed_qa_points:
+                if older == current:
+                    # No relevant changes
                     continue
-                if old_milestone is not None:
-                    remove_ticket_from(all_data, old_milestone, isodate, old_state, issue.id, old_dev_points, old_qa_points)
-                if guessed_milestone is not None:
-                    add_ticket_to(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
-                if not guessed_qa_points and not guessed_dev_points:
+                
+                if current['milestone'] is not None:
+                    # We are in a milestone now, so add into that
+                    add_ticket_to(all_data, current['milestone'], isodate, current['state'], issue.id, current['dev_points'], current['qa_points'])
+                
+                if older['milestone'] is not None:
+                    # We were in a milestone before this change happend, so
+                    # remove from there
+                    remove_ticket_from(all_data, older['milestone'], isodate, older['state'], issue.id, older['dev_points'], older['qa_points'])
+                                
+                if not current['dev_points'] and not current['dev_points']:
                     log.debug("%s is unpointed" % (issue))
-                    if guessed_milestone:
-                        add_to_all_data(all_data, guessed_milestone, isodate)[state]['unp'].add(issue.id)
-            if created_in_milestone_with_points and guessed_milestone is not None:
+                    if current['milestone']:
+                        add_to_all_data(all_data, current['milestone'], isodate)[current['state']]['unp'].add(issue.id)
+                
+                # We've updated ourselves to the right state now
+                current = older
+            
+            if current['milestone'] is not None:
                 # This wasn't transfered in, so add it now.
-                remove_ticket_from(all_data, guessed_milestone, isodate, state, issue.id, guessed_dev_points, guessed_qa_points)
+                add_ticket_to(all_data, current['milestone'], isodate, current['state'], issue.id, current['dev_points'], current['qa_points'])
         
         for project_key in PlanIORoot:
             project = PlanIORoot[project_key]
@@ -265,13 +292,14 @@ class Scraper(object):
                         'finished': {'tickets': set(), 'devp': 0, 'qap': 0, 'unp': set()},
                     }
                     days = all_data[milestone_key]
+
                     for day in sorted(days):
                         today = date(*map(int, day.split("-")))
                         for status in ('backlog', 'inprogress', 'finished'):
-                            tickets[status]['tickets'] = tickets[status]['tickets'].union(days[day][status]['ticket_removed'])
-                            tickets[status]['tickets'] -= days[day][status]['ticket_added']
-                            tickets[status]['devp'] -= days[day][status]['devp']
-                            tickets[status]['qap'] -= days[day][status]['qap']
+                            tickets[status]['tickets'] -= days[day][status]['ticket_removed']
+                            tickets[status]['tickets'] = tickets[status]['tickets'].union(days[day][status]['ticket_added'])
+                            tickets[status]['devp'] += days[day][status]['devp']
+                            tickets[status]['qap'] += days[day][status]['qap']
                             tickets[status]['unp'] = days[day][status]['unp']
                         
                         day_info = Day(today, copy.deepcopy(tickets))
