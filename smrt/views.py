@@ -27,7 +27,8 @@ class Views(BaseLayouts):
         for mile_key in project.milestones:
             mile = project.milestones[mile_key]
 
-        return { "project" : project, "exist" : (len(project.milestones) > 0) }
+        return { "project" : project, "exist" : (len(project.milestones) > 0),
+             "milestones":sorted(project.milestones)}
     
     @view_config(context=Milestone)
     def milestone_view(self):

@@ -7,7 +7,7 @@
             <h2>Milestones</h2>
             <h5 tal:condition="not:exist">No milestones are currently configured.</h5>
             <ul tal:condition="exist">
-                <li tal:repeat="mile_key project.milestones">
+                <li tal:repeat="mile_key milestones">
                     <tal:block tal:define="milestone project.milestones[mile_key]">
                         <span class="label label-${['info','success'][milestone.status=='open']}">${milestone.status}</span>
                         <a href="/${project.__name__}/${milestone.__name__}">${milestone.title}</a>
