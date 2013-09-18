@@ -37,9 +37,6 @@ def remove_ticket_from(all_data, milestone, isodate, state, issue_id, guessed_de
     data['devp'] -= guessed_dev_points
     data['qap'] -= guessed_qa_points
     
-    if issue_id in data['ticket_removed']:
-        import pdb; pdb.set_trace()
-    
     if issue_id in data['ticket_added']:
         data['ticket_added'].remove(issue_id)
     else:
@@ -50,9 +47,6 @@ def add_ticket_to(all_data, milestone, isodate, state, issue_id, guessed_dev_poi
     log.info("%s - adding %s to %s (%s %d %d)" % (isodate, issue_id, milestone, state, guessed_dev_points, guessed_qa_points))
     data['devp'] += guessed_dev_points
     data['qap'] += guessed_qa_points
-    
-    if issue_id in data['ticket_added']:
-        import pdb; pdb.set_trace()
     
     
     if issue_id in data['ticket_removed']:
@@ -174,7 +168,7 @@ class Scraper(object):
     def populateHistorical(self, PlanIORoot):
         self.grabData(PlanIORoot)
         
-        issues = rubber.issues#projects['budget-simulator'].issues
+        issues = rubber.issues
         # Include changes to the issue
         issues._item_path = '/issues/%s.json?include=journals'
         
@@ -221,9 +215,6 @@ class Scraper(object):
                         if detail['name'] == 'fixed_version_id':
                             older['milestone'] = detail.get('old_value', None)
                         
-                            #if unicode(detail.get('new_value') or 'None') != unicode(current['milestone']):
-                            #    import pdb; pdb.set_trace()
-                        
                             log.debug("Guessing milestone %s due to %s" % (older['milestone'], detail))                            
                             if older['milestone'] is not None:
                                 older['milestone'] = int(older['milestone'])
@@ -239,19 +230,11 @@ class Scraper(object):
                             del older['status']
                         
                         if detail['property'] == 'cf' and detail['name'] == '2':
-                            # DEV points
-                        
-                            #if unicode(detail.get('new_value') or '0') != unicode(current['dev_points']):
-                            #    import pdb; pdb.set_trace()
-
+                            # DEV points                        
                             older['dev_points'] = int(detail.get('old_value') or '0')
                             log.debug("Repointing %s to %s (DEV)" % (issue, older['dev_points']))
                         if detail['property'] == 'cf' and detail['name'] == '3':
                             # QA points
-                        
-                            #if unicode(detail.get('new_value') or '0') != unicode(current['qa_points']):
-                            #    import pdb; pdb.set_trace()
-                            print detail
                             older['qa_points'] = int(detail.get('old_value') or '0')
                             log.debug("Repointing %s to %s (QA)" % (issue, older['qa_points']))
                     
@@ -278,7 +261,7 @@ class Scraper(object):
                 current = older
             
             if current['milestone'] is not None:
-                # This wasn't transfered in, so add it now.
+                # Add the oldest state, too.
                 add_ticket_to(all_data, current['milestone'], isodate, current['state'], issue.id, current['dev_points'], current['qa_points'])
         
         for project_key in PlanIORoot:
