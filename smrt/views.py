@@ -17,8 +17,8 @@ class Views(BaseLayouts):
     
     @view_config(context=PlanIO, renderer='templates/welcome.pt')
     def base_view(self):
-        
-        return { "projects" : self.context, "exist" : (len(self.context) > 0) }
+        projects = dict(project for project in self.context.items() if project[1].milestones)
+        return { "projects" : projects, "exist" : (len(self.context) > 0) }
 
     @view_config(context=Project, renderer="templates/project.pt")
     def project_view(self):
