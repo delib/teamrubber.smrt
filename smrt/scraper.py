@@ -81,11 +81,6 @@ class Scraper(object):
     
     def grabData(self, PlanIORoot):
         
-        # We don't want to run on weekends
-        if datetime.today().weekday() > 4:
-            print "It's a weekend, SKIP!"
-            return
-        
         # Run the actual update
         available_projects = set(project.identifier for project in rubber.projects)
         missing_projects = available_projects - set(PlanIORoot.keys())
