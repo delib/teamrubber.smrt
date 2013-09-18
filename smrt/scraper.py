@@ -107,10 +107,6 @@ class Scraper(object):
                 today = datetime.now() 
                 today = today.date()
                 
-                # Don't run twice on the same day!
-                if today.isoformat() in milestone.days:
-                    continue
-                
                 log.debug("Getting tickets in %s" % `milestone`)
                 issues = list(rubber.projects[project_key].issues.query(fixed_version_id=milestone.__name__, status_id='*'))
 
