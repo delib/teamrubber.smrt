@@ -18,7 +18,7 @@
                 </li>
                 <br />
             </ul>
-            <a href="/refresh">Refresh All Data</a>
+            <!--a href="/refresh">Refresh All Data</a-->
         </div>
         
     </tal:block>
