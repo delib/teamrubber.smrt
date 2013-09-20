@@ -11,6 +11,8 @@
                     <tal:block tal:define="milestone project.milestones[mile_key]">
                         <span class="label label-${['info','success'][milestone.status=='open']}">${milestone.status}</span>
                         <a href="/${project.__name__}/${milestone.__name__}">${milestone.title}</a>
+                        <br /><span tal:replace="structure sparks[milestone.__name__]" />
+                        <br /><br />
                     </tal:block>
                 </li>
                 <br />

@@ -9,6 +9,8 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.response import Response
 from datetime import datetime, timedelta
 
+import pygal
+
 class Views(BaseLayouts):
     
     def __init__(self, context, request):
@@ -24,11 +26,18 @@ class Views(BaseLayouts):
     def project_view(self):
         
         project = self.context
+        sparks = {}
+        
         for mile_key in project.milestones:
             mile = project.milestones[mile_key]
-
+            line_chart = pygal.Line()
+            days = sorted(mile.days)
+            totals = [mile.days[day].totals for day in days]
+            line_chart.add('points', [total['devp']+total['qap'] for total in totals])
+            sparks[mile_key] = line_chart.render_sparkline(height=30,style=pygal.style.LightColorizedStyle).decode("utf-8")
+        
         return { "project" : project, "exist" : (len(project.milestones) > 0),
-             "milestones":sorted(project.milestones)}
+             "milestones":sorted(project.milestones), "sparks":sparks}
     
     @view_config(context=Milestone)
     def milestone_view(self):
@@ -66,7 +75,6 @@ class Views(BaseLayouts):
             current = current.previous
         
         max_val = max(day.totals['devp']+day.totals['qap'] for day in milestone.days.values())+2
-        import pygal
         line_chart = pygal.StackedLine(fill=True, style=pygal.style.LightColorizedStyle, height=300, width=1100, include_x_axis=True, range=(0,max_val), explicit_size=True)
         line_chart.title = 'Milestone'
         line_chart.add('Dev points', [day.totals['devp'] for day in days])
