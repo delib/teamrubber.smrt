@@ -46,7 +46,7 @@
             <br />
 
             <div class="completed small" tal:condition="not:period">
-                <h3>Completed yesterday:</h3>
+                <h3>Completed on ${today.date.strftime("%d/%m/%Y")} (Before 10:30pm):</h3>
                 <table class="table table-bordered" style="font-size: 24px;">
                   <thead>
                     <tr style="background: #eaeaea;">
