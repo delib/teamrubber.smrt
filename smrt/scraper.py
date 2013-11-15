@@ -90,7 +90,10 @@ class Scraper(object):
         
         for project_key in PlanIORoot:
             project = PlanIORoot[project_key]
-            available_milestones = set(milestone.id for milestone in rubber.projects[project_key].versions)
+            try:
+                available_milestones = set(milestone.id for milestone in rubber.projects[project_key].versions)
+            except KeyError:
+                continue
             missing_milestones = available_milestones - set(project.milestones)
             
             for milestone in missing_milestones:
