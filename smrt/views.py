@@ -77,6 +77,7 @@ class Views(BaseLayouts):
         max_val = max(day.totals['devp']+day.totals['qap'] for day in milestone.days.values())+2
         line_chart = pygal.StackedLine(fill=True, style=pygal.style.LightColorizedStyle, height=300, width=1100, include_x_axis=True, range=(0,max_val), explicit_size=True)
         line_chart.title = 'Milestone'
+        line_chart.add('Completed points',  [day.issues['finished']['devp']+day.issues['finished']['qap'] for day in days])
         line_chart.add('Dev points', [day.totals['devp'] for day in days])
         line_chart.add('QA points',  [day.totals['qap'] for day in days])
         line_chart.x_labels = [day.__name__ for day in days]
