@@ -12,7 +12,9 @@ import itertools
 
 log = logging.getLogger('smrt')
 
-rubber = Redmine("https://teamrubber.plan.io", key='6be8066d90ab38eca7a3edd2412dab92ae54c2eb', version=1.4)
+key = os.path.abspath(os.path.join(__file__, "../../redmine.key"))
+
+rubber = Redmine("https://teamrubber.plan.io", key=open(key, 'r').read(), version=1.4)
 
 def add_to_all_data(all_data, milestone=None, isodate=None):
     if milestone is None or isodate is None:
