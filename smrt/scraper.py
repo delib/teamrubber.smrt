@@ -104,8 +104,10 @@ class Scraper(object):
 
             for milestone_key in project.milestones:
                 milestone = project[milestone_key]
-                
-                milestone.status = rubber.projects[project_key].versions[milestone_key].status
+                try:
+                    milestone.status = rubber.projects[project_key].versions[milestone_key].status
+                except KeyError: # Milestone was deleted
+                    continue
                 if milestone.status != 'open':
                     continue
                 
